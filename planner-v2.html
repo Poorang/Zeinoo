@@ -421,18 +421,6 @@ function pj(s){
 function pn(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
 
 
-// function faNumToEn(s){
-//   return s.replace(/[۰-۹]/g, ch => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(ch)]);
-// }
-// function todayJ(){
-//   const s = new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-//   const [y,m,d] = faNumToEn(s).split('/').map(Number);
-//   return {y,m,d};
-// }
-
-// // به جای toJ(new Date...) اینو بذار:
-// const _tg = new Date();
-// const _tj = todayJ();
 
 
 // ═══ STATE ═══
@@ -451,7 +439,21 @@ window.TK=[
 window.DB={};   // DB[wk][taskId][dayStr]={planned,actual}
 window.CM={};   // CM[wk][taskId][dayStr]={cell,planned,actual,delayReason}
 
-const _tg=new Date(), _tj=toJ(_tg.getFullYear(),_tg.getMonth()+1,_tg.getDate());
+// const _tg=new Date(), _tj=toJ(_tg.getFullYear(),_tg.getMonth()+1,_tg.getDate());
+function faNumToEn(s){
+  return s.replace(/[۰-۹]/g, ch => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(ch)]);
+}
+function todayJ(){
+  const s = new Intl.DateTimeFormat('fa-IR-u-ca-persian',{
+    year:'numeric',month:'2-digit',day:'2-digit'
+  }).format(new Date());
+  const [y,m,d] = faNumToEn(s).split('/').map(Number);
+  return {y,m,d};
+}
+const _tg = new Date();
+const _tj = todayJ();
+
+  
 let CWS=wkStart(_tj.y,_tj.m,_tj.d); // current week start
 let SEC='all';
 let _fbReady=false;
