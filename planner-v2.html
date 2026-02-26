@@ -570,7 +570,24 @@ function rRow(task,wd,tds){
 }
 
 // ═══ CALENDAR ═══
-function toggleCal(){const p=document.getElementById('calpop');if(p.classList.contains('open'))closeCal();else{p.classList.add('open');renderCal();}}
+//function toggleCal(){const p=document.getElementById('calpop');if(p.classList.contains('open'))closeCal();else{p.classList.add('open');renderCal();}}
+function toggleCal(){
+  const p = document.getElementById('calpop');
+  const b = document.getElementById('calBtn');
+
+  if(p.classList.contains('open')){
+    closeCal();
+    return;
+  }
+
+  // موقعیت تقویم زیر دکمه
+  const r = b.getBoundingClientRect();
+  p.style.top = (r.bottom + 8) + 'px';
+  p.style.right = (window.innerWidth - r.right) + 'px';
+
+  p.classList.add('open');
+  renderCal();
+}
 function closeCal(){document.getElementById('calpop').classList.remove('open');}
 function calMv(d){calM+=d;if(calM>12){calM=1;calY++;}if(calM<1){calM=12;calY--;}renderCal();}
 function gotoToday(){CWS=wkStart(_tj.y,_tj.m,_tj.d);calY=CWS.y;calM=CWS.m;renderCal();render();}
