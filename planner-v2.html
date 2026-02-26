@@ -331,7 +331,7 @@ textarea.fi{resize:vertical;min-height:58px;}
         <div class="delay-sec">
           <div class="delay-sec-title">⚠️ تأخیرات نسبت به برنامه</div>
           <div id="dinfo" class="delay-info"></div>
-          <div class="fg"><label class="fl">دلیل تأخیر (اختیاری)</label><textarea class="fi" id="dcmt" placeholder="چرا تأخیر داشتی؟"></textarea></div>
+          <div class="fg"><label class="fl">دلیل تأخیر (اجباری در صورت تأخیر)</label><textarea class="fi" id="dcmt" placeholder="دلیل تأخیر را بنویس..."></textarea></div>
         </div>
       </div>
       <div class="fg"><label class="fl">یادداشت (اختیاری)</label><textarea class="fi" id="ecmt" placeholder="یادداشت برای این فعالیت..."></textarea></div>
@@ -441,24 +441,14 @@ window.CM={};   // CM[wk][taskId][dayStr]={cell,planned,actual,delayReason}
 
 // const _tg=new Date(), _tj=toJ(_tg.getFullYear(),_tg.getMonth()+1,_tg.getDate());
 function todayJ(){
-  // Force latin digits and parse via parts so locale separators/digits cannot break parsing.
-  const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn',{
-    year:'numeric',month:'2-digit',day:'2-digit'
-  }).formatToParts(new Date());
-  const y = Number(parts.find(p => p.type === 'year')?.value);
-  const m = Number(parts.find(p => p.type === 'month')?.value);
-  const d = Number(parts.find(p => p.type === 'day')?.value);
-  if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d)){
-    const g=new Date();
-    return toJ(g.getFullYear(),g.getMonth()+1,g.getDate());
-  }
-  return {y,m,d};
+  const g=new Date();
+  return toJ(g.getFullYear(),g.getMonth()+1,g.getDate());
 }
 const _tg = new Date();
-const _tj = todayJ();
+const _tj0 = todayJ();
 
   
-let CWS=wkStart(_tj.y,_tj.m,_tj.d); // current week start
+let CWS=wkStart(_tj0.y,_tj0.m,_tj0.d); // current week start
 let SEC='all';
 let _fbReady=false;
 let calY=CWS.y, calM=CWS.m;
@@ -524,7 +514,8 @@ function rGauges(){
 
 function rGrid(){
   const wd=wkDays(CWS.y,CWS.m,CWS.d);
-  const tds=jstr(_tj.y,_tj.m,_tj.d);
+  const t=todayJ();
+  const tds=jstr(t.y,t.m,t.d);
   let filt=window.TK;
   if(SEC==='ielts')filt=window.TK.filter(t=>t.type==='ielts');
   if(SEC==='uni')filt=window.TK.filter(t=>t.type==='uni');
@@ -574,6 +565,7 @@ function rRow(task,wd,tds){
           <div class="ebt">${fr(cell.actual)}</div><div class="ebd">${ms(d)}</div>
           ${dly?.start?`<div class="delay d-st" onclick="event.stopPropagation();openCMT('${task.id}','${ds}')">⚠ شروع +${ms(dly.start)}</div>`:''}
           ${dly?.end?`<div class="delay d-en" onclick="event.stopPropagation();openCMT('${task.id}','${ds}')">⚠ پایان +${ms(dly.end)}</div>`:''}
+          ${cmt.delayReason?`<div class="cmt-row">⚠ دلیل تأخیر: ${cmt.delayReason}</div>`:''}
           </div>`;
         if(pd>0){
           if(diff>0) h+=`<div class="diff d-more">↑ ${ms(diff)} بیشتر</div>`;
@@ -621,14 +613,15 @@ function toggleCal(){
 
 function closeCal(){document.getElementById('calpop').classList.remove('open');}
 function calMv(d){calM+=d;if(calM>12){calM=1;calY++;}if(calM<1){calM=12;calY--;}renderCal();}
-function gotoToday(){CWS=wkStart(_tj.y,_tj.m,_tj.d);calY=CWS.y;calM=CWS.m;renderCal();render();}
+function gotoToday(){const t=todayJ();CWS=wkStart(t.y,t.m,t.d);calY=CWS.y;calM=CWS.m;renderCal();render();}
 window.toggleCal=toggleCal;window.closeCal=closeCal;window.calMv=calMv;window.gotoToday=gotoToday;
 
 function renderCal(){
   document.getElementById('cph-title').textContent=`${PM[calM-1]} ${pn(calY)}`;
   const tot=dimJ(calY,calM);
   const fdow=jdow(calY,calM,1);
-  const tds=jstr(_tj.y,_tj.m,_tj.d);
+  const t=todayJ();
+  const tds=jstr(t.y,t.m,t.d);
   const swds=wkDays(CWS.y,CWS.m,CWS.d).map(j=>jstr(j.y,j.m,j.d));
   let h='';
   for(let i=0;i<fdow;i++)h+=`<div class="cpd empty"></div>`;
@@ -709,6 +702,13 @@ function saveE(){
   if(!f||!t){alert('ساعت شروع و پایان را وارد کنید.');return;}
   if(pt(t)-pt(f)<=0){alert('ساعت پایان باید بعد از شروع باشد.');return;}
   const {tid,ds,mode}=MS;
+  const cell=gC(tid,ds);
+  const dly=mode==='actual'?dlyCalc(cell?.planned,{from:f,to:t}):null;
+  const delayReason=document.getElementById('dcmt').value.trim();
+  if(mode==='actual'&&dly&&!delayReason){
+    alert('برای ثبت زمان واقعیِ دارای تأخیر، نوشتن دلیل تأخیر الزامی است.');
+    return;
+  }
   if(!window.DB[wk()])window.DB[wk()]={};
   if(!window.DB[wk()][tid])window.DB[wk()][tid]={};
   if(!window.DB[wk()][tid][ds])window.DB[wk()][tid][ds]={};
@@ -716,7 +716,10 @@ function saveE(){
   const cmt=gCM(tid,ds);
   const ec=document.getElementById('ecmt').value.trim();
   if(mode==='plan')cmt.planned=ec;
-  else{cmt.actual=ec;cmt.delayReason=document.getElementById('dcmt').value.trim();}
+  else{
+    cmt.actual=ec;
+    cmt.delayReason=dly?delayReason:'';
+  }
   sCM(tid,ds,cmt);
   closeEM();saveFB();render();
 }
