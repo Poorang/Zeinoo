@@ -440,14 +440,18 @@ window.DB={};   // DB[wk][taskId][dayStr]={planned,actual}
 window.CM={};   // CM[wk][taskId][dayStr]={cell,planned,actual,delayReason}
 
 // const _tg=new Date(), _tj=toJ(_tg.getFullYear(),_tg.getMonth()+1,_tg.getDate());
-function faNumToEn(s){
-  return s.replace(/[۰-۹]/g, ch => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(ch)]);
-}
 function todayJ(){
-  const s = new Intl.DateTimeFormat('fa-IR-u-ca-persian',{
+  // Force latin digits and parse via parts so locale separators/digits cannot break parsing.
+  const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn',{
     year:'numeric',month:'2-digit',day:'2-digit'
-  }).format(new Date());
-  const [y,m,d] = faNumToEn(s).split('/').map(Number);
+  }).formatToParts(new Date());
+  const y = Number(parts.find(p => p.type === 'year')?.value);
+  const m = Number(parts.find(p => p.type === 'month')?.value);
+  const d = Number(parts.find(p => p.type === 'day')?.value);
+  if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d)){
+    const g=new Date();
+    return toJ(g.getFullYear(),g.getMonth()+1,g.getDate());
+  }
   return {y,m,d};
 }
 const _tg = new Date();
