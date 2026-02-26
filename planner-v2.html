@@ -409,8 +409,15 @@ function dimJ(y,m){if(m<=6)return 31;if(m<=11)return 30;const g=toG(y,12,29),g2=
 function jdow(jy,jm,jd){const g=toG(jy,jm,jd);return(new Date(g.y,g.m-1,g.d).getDay()+1)%7;}
 function wkStart(jy,jm,jd){const dow=jdow(jy,jm,jd),g=toG(jy,jm,jd),d=new Date(g.y,g.m-1,g.d);d.setDate(d.getDate()-dow);return toJ(d.getFullYear(),d.getMonth()+1,d.getDate());}
 function wkDays(jy,jm,jd){const days=[],g0=toG(jy,jm,jd),d0=new Date(g0.y,g0.m-1,g0.d);for(let i=0;i<7;i++){const d=new Date(d0);d.setDate(d.getDate()+i);days.push(toJ(d.getFullYear(),d.getMonth()+1,d.getDate()));}return days;}
-function jstr(jy,jm,jd){return`${jy}/${String(jm).padStart(2,'0')}/${String(jd).padStart(2,'0')}`;}
-function pj(s){const[y,m,d]=s.split('/').map(Number);return{y,m,d};}
+//function jstr(jy,jm,jd){return`${jy}/${String(jm).padStart(2,'0')}/${String(jd).padStart(2,'0')}`;}
+//function pj(s){const[y,m,d]=s.split('/').map(Number);return{y,m,d};}
+function jstr(jy,jm,jd){
+  return `${jy}-${String(jm).padStart(2,'0')}-${String(jd).padStart(2,'0')}`;
+}
+function pj(s){
+  const [y,m,d] = s.split('-').map(Number);
+  return {y,m,d};
+}
 function pn(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
 
 // ═══ STATE ═══
@@ -440,7 +447,17 @@ let CMT_S={tid:null,ds:null};          // comment state
 
 // ═══ FIREBASE HELPERS ═══
 function setSS(s){const d=document.getElementById('sdot'),l=document.getElementById('slbl');d.className='sync-dot '+s;l.textContent=s==='syncing'?'در حال ذخیره..':s==='synced'?'ذخیره شد':'خطا';}
-function saveFB(){setSS('syncing');Promise.all([window._fbSet('tasks',window.TK),window._fbSet('data',window.DB),window._fbSet('comments',window.CM)]).then(()=>setSS('synced')).catch(()=>setSS('error'));}
+//function saveFB(){setSS('syncing');Promise.all([window._fbSet('tasks',window.TK),window._fbSet('data',window.DB),window._fbSet('comments',window.CM)]).then(()=>setSS('synced')).catch(()=>setSS('error'));}
+function saveFB(){
+  setSS('syncing');
+  Promise.all([
+    window._fbSet('tasks', window.TK),
+    window._fbSet('data', window.DB),
+    window._fbSet('comments', window.CM),
+  ])
+  .then(()=>setSS('synced'))
+  .catch((e)=>{ console.error('SAVE ERROR:', e); setSS('error'); });
+}
 window.setSS=setSS;
 
 // ═══ DATA HELPERS ═══
