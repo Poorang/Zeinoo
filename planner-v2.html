@@ -421,18 +421,18 @@ function pj(s){
 function pn(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
 
 
-function faNumToEn(s){
-  return s.replace(/[۰-۹]/g, ch => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(ch)]);
-}
-function todayJ(){
-  const s = new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-  const [y,m,d] = faNumToEn(s).split('/').map(Number);
-  return {y,m,d};
-}
+// function faNumToEn(s){
+//   return s.replace(/[۰-۹]/g, ch => "0123456789"["۰۱۲۳۴۵۶۷۸۹".indexOf(ch)]);
+// }
+// function todayJ(){
+//   const s = new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+//   const [y,m,d] = faNumToEn(s).split('/').map(Number);
+//   return {y,m,d};
+// }
 
-// به جای toJ(new Date...) اینو بذار:
-const _tg = new Date();
-const _tj = todayJ();
+// // به جای toJ(new Date...) اینو بذار:
+// const _tg = new Date();
+// const _tj = todayJ();
 
 
 // ═══ STATE ═══
