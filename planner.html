@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه‌یار هفتگی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f7f5;
+  --white: #ffffff;
+  --surface: #f2f1ef;
+  --border: #e5e3df;
+  --border2: #d4d1cc;
+  --ink: #1c1917;
+  --mid: #44403c;
+  --muted: #78716c;
+  --faint: #a8a29e;
+  --blue: #2563eb;
+  --blue-soft: #eff6ff;
+  --blue-border: #bfdbfe;
+  --purple: #7c3aed;
+  --purple-soft: #f5f3ff;
+  --purple-border: #ddd6fe;
+  --green: #16a34a;
+  --green-soft: #f0fdf4;
+  --green-border: #bbf7d0;
+  --red: #dc2626;
+  --red-soft: #fef2f2;
+  --red-border: #fecaca;
+  --orange: #ea580c;
+  --orange-soft: #fff7ed;
+  --orange-border: #fed7aa;
+  --amber: #d97706;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ── Header ── */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
+.logo {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+.logo span { color: var(--blue); }
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+.week-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.week-btn:hover { background: var(--surface); color: var(--ink); }
+.week-label { font-size: 13px; font-weight: 600; color: var(--mid); white-space: nowrap; }
+
+.header-stats {
+  display: flex;
+  gap: 8px;
+  margin-right: auto;
+}
+.hstat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.hstat-ielts-high { background: var(--green-soft); color: var(--green); border-color: var(--green-border); }
+.hstat-ielts-mid  { background: var(--surface); color: var(--mid); border-color: var(--border); }
+.hstat-ielts-low  { background: var(--red-soft); color: var(--red); border-color: var(--red-border); }
+.hstat-uni { background: var(--orange-soft); color: var(--orange); border-color: var(--orange-border); }
+
+.section-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 3px;
+}
+.stab {
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Vazirmatn', sans-serif;
+  transition: all 0.15s;
+}
+.stab.active { background: var(--white); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+/* ── Body ── */
+.body {
+  flex: 1;
+  overflow: auto;
+  padding: 20px 24px;
+}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD GAUGES
+═══════════════════════════════════════════ */
+.gauges {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.gauge-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.gauge-card:hover { box-shadow: var(--shadow); }
+.gauge-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.gauge-info { min-width: 0; }
+.gauge-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; white-space: nowrap; }
+.gauge-val { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+.gauge-sub { font-size: 10px; color: var(--faint); margin-top: 1px; }
+
+/* ═══════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════ */
+.grid-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.grid-container {
+  overflow-x: auto;
+}
+
+table.weekly-grid {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+/* Column headers (days) */
+.weekly-grid thead th {
+  background: var(--ink);
+  color: white;
+  padding: 0;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.weekly-grid thead th:first-child {
+  width: 180px;
+  min-width: 180px;
+  background: var(--ink);
+}
+.day-header {
+  padding: 10px 10px 8px;
+  text-align: center;
+}
+.day-header .dh-name { font-size: 12px; font-weight: 700; }
+.day-header .dh-date { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+.day-header .dh-total {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: default;
+}
+.dht-high { background: rgba(22,163,74,0.25); color: #4ade80; }
+.dht-mid  { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+.dht-low  { background: rgba(220,38,38,0.3); color: #fca5a5; }
+
+/* Section rows */
+.section-header-row td {
+  background: #f0eeec;
+  padding: 6px 14px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+.section-header-row.ielts-section td { color: var(--blue); background: #f0f5ff; }
+.section-header-row.uni-section td { color: var(--orange); background: #fff8f2; }
+
+/* Task row */
+.task-row td {
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  padding: 0;
+}
+.task-row:last-child td { border-bottom: none; }
+.task-row:hover td { background: #fafaf9; }
+
+/* Task name cell */
+.task-name-cell {
+  padding: 8px 14px;
+  position: sticky;
+  right: 0;
+  background: var(--white);
+  z-index: 2;
+  border-left: 1px solid var(--border);
+}
+.task-row:hover .task-name-cell { background: #fafaf9; }
+
+.tn-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.tn-name { font-size: 12px; font-weight: 600; color: var(--mid); line-height: 1.3; }
+.tn-weekly {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.twk-ielts { background: var(--blue-soft); color: var(--blue); border: 1px solid var(--blue-border); }
+.twk-uni { background: var(--orange-soft); color: var(--orange); border: 1px solid var(--orange-border); }
+
+/* Day cell */
+.day-cell {
+  padding: 6px 8px;
+  min-width: 120px;
+  min-height: 72px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.12s;
+}
+.day-cell:hover { background: var(--blue-soft); }
+.day-cell.editing { background: var(--blue-soft); outline: 2px solid var(--blue); outline-offset: -2px; border-radius: 4px; }
+
+.entry-block {
+  border-radius: 6px;
+  padding: 4px 7px;
+  margin-bottom: 4px;
+  position: relative;
+}
+.entry-planned {
+  background: var(--blue-soft);
+  border: 1px solid var(--blue-border);
+}
+.entry-actual {
+  background: var(--purple-soft);
+  border: 1px solid var(--purple-border);
+}
+.entry-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.entry-planned .entry-label { color: var(--blue); }
+.entry-actual .entry-label { color: var(--purple); }
+.entry-time { font-size: 11px; font-weight: 600; color: var(--mid); }
+.entry-dur {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.diff-line {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 0;
+}
+.diff-plus { color: var(--red); }
+.diff-minus { color: var(--green); }
+.diff-zero { color: var(--faint); }
+
+.add-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 60px;
+  color: var(--border);
+  font-size: 20px;
+  transition: color 0.15s;
+}
+.day-cell:hover .add-hint { color: var(--blue); }
+
+/* ═══════════════════════════════════════════
+   MODAL / FORM
+═══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(28,25,23,0.45);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal {
+  background: var(--white);
+  border-radius: 16px;
+  width: 420px;
+  max-width: 95vw;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  transform: translateY(8px) scale(0.98);
+  transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: none; }
+.modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
+.modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.modal-close {
+  width: 30px; height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+}
+.modal-close:hover { background: var(--surface); }
+
+.modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 3px;
+}
+.mt-btn {
+  padding: 9px;
+  border-radius: 7px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: 'Vazirmatn', sans-serif;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.mt-btn.active-plan { background: var(--white); color: var(--blue); box-shadow: var(--shadow-sm); }
+.mt-btn.active-actual { background: var(--white); color: var(--purple); box-shadow: var(--shadow-sm); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  color: var(--ink);
+  font-family: 'Vazirmatn', sans-serif;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.form-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  background: var(--white);
+}
+.form-input.purple:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+}
+
+.duration-preview {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.duration-preview strong { color: var(--ink); font-size: 15px; font-weight: 800; }
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Vazirmatn', sans-serif;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.btn-ghost { background: var(--surface); color: var(--mid); border-color: var(--border); }
+.btn-ghost:hover { background: var(--border); }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-danger { background: var(--red-soft); color: var(--red); border-color: var(--red-border); }
+.btn-danger:hover { background: var(--red-border); }
+
+/* ═══════════════════════════════════════════
+   LEGEND + FOOTER
+═══════════════════════════════════════════ */
+.grid-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+.add-task-btn {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Vazirmatn', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.add-task-btn:hover { background: #1d4ed8; }
+
+/* ═══════════════════════════════════════════
+   TASK MGMT MODAL
+═══════════════════════════════════════════ */
+.task-mgmt-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.task-mgmt-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.task-mgmt-item .tm-name { font-size: 13px; font-weight: 500; flex: 1; }
+.task-mgmt-item .tm-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+.tm-type-ielts { background: var(--blue-soft); color: var(--blue); }
+.tm-type-uni { background: var(--orange-soft); color: var(--orange); }
+.task-mgmt-item .tm-del {
+  width: 24px; height: 24px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.task-mgmt-item .tm-del:hover { background: var(--red-soft); border-color: var(--red-border); color: var(--red); }
+
+.add-task-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.add-task-form .form-input { flex: 1; }
+.type-select {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  color: var(--ink);
+  font-family: 'Vazirmatn', sans-serif;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  width: 100px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* entry delete btn */
+.entry-del {
+  position: absolute;
+  top: 2px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.08);
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  line-height: 1;
+}
+.entry-block:hover .entry-del { display: flex; }
+.entry-del:hover { background: var(--red-soft); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="logo"><div class="logo-dot"></div>برنامه<span>یار</span></div>
+    <div class="week-nav">
+      <button class="week-btn" onclick="changeWeek(-1)">›</button>
+      <div class="week-label" id="weekLabel">هفته ۱ — اسفند ۱۴۰۳</div>
+      <button class="week-btn" onclick="changeWeek(1)">‹</button>
+    </div>
+    <div class="header-stats" id="headerStats"></div>
+    <div class="section-tabs">
+      <button class="stab active" onclick="setSection('all',this)">همه</button>
+      <button class="stab" onclick="setSection('ielts',this)">IELTS</button>
+      <button class="stab" onclick="setSection('uni',this)">دانشگاه</button>
+    </div>
+  </div>
+
+  <!-- ── BODY ── -->
+  <div class="body">
+    <!-- Gauges -->
+    <div class="gauges" id="gauges"></div>
+
+    <!-- Grid -->
+    <div class="grid-wrap">
+      <div class="grid-container">
+        <table class="weekly-grid" id="weeklyGrid"></table>
+      </div>
+      <div class="grid-footer">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--blue-soft);border:1px solid var(--blue-border)"></div>برنامه‌ریزی‌شده
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--purple-soft);border:1px solid var(--purple-border)"></div>واقعی
+        </div>
+        <div class="legend-item" style="color:var(--green)">■ آیلتس ۴+ ساعت</div>
+        <div class="legend-item" style="color:var(--mid)">■ ۲–۴ ساعت</div>
+        <div class="legend-item" style="color:var(--red)">■ زیر ۲ ساعت</div>
+        <button class="add-task-btn" onclick="openTaskMgmt()">⚙ مدیریت آیتم‌ها</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ENTRY MODAL ═══ -->
+<div class="modal-overlay" id="entryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">ثبت فعالیت</div>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mode-toggle">
+        <button class="mt-btn active-plan" id="modePlan" onclick="setMode('plan')">📋 برنامه‌ریزی</button>
+        <button class="mt-btn" id="modeActual" onclick="setMode('actual')">✅ واقعی</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">از ساعت</label>
+          <input class="form-input" type="time" id="inputFrom" oninput="calcDuration()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">تا ساعت</label>
+          <input class="form-input" type="time" id="inputTo" oninput="calcDuration()">
+        </div>
+      </div>
+      <div class="duration-preview">
+        <span>مدت زمان</span>
+        <strong id="durationDisplay">—</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteBtn" onclick="deleteEntry()" style="display:none">حذف</button>
+      <button class="btn btn-ghost" onclick="closeModal()">انصراف</button>
+      <button class="btn btn-primary" onclick="saveEntry()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TASK MGMT MODAL ═══ -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">مدیریت آیتم‌ها</div>
+        <div class="modal-subtitle">آیتم‌ها را اضافه یا حذف کنید</div>
+      </div>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="task-mgmt-list" id="taskMgmtList"></div>
+      <div class="add-task-form">
+        <input class="form-input" type="text" id="newTaskName" placeholder="نام آیتم جدید..." style="flex:1">
+        <select class="type-select" id="newTaskType">
+          <option value="ielts">IELTS</option>
+          <option value="uni">دانشگاه</option>
+        </select>
+        <button class="btn btn-primary" onclick="addTask()">افزودن</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTaskModal()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const DAYS = ['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];
+const DATES = ['۱۷','۱۸','۱۹','۲۰','۲۱','۲۲','۲۳'];
+
+let tasks = [
+  // IELTS
+  { id:'vocab',   name:'Vocabulary (Review)', type:'ielts' },
+  { id:'mistakes',name:'My Mistakes',          type:'ielts' },
+  { id:'shadow',  name:'Shadowing',            type:'ielts' },
+  { id:'sp-prep', name:'Speaking - Preparation',type:'ielts' },
+  { id:'speak',   name:'Speaking',             type:'ielts' },
+  { id:'sp-rev',  name:'Speaking (Review)',    type:'ielts' },
+  { id:'wt1s',    name:'Writing Task 1 - Sample',type:'ielts'},
+  { id:'wt1',     name:'Writing Task 1',       type:'ielts' },
+  { id:'wt2s',    name:'Writing Task 2 - Sample',type:'ielts'},
+  { id:'wt2',     name:'Writing Task 2',       type:'ielts' },
+  { id:'lis-w',   name:'Listening Warm-up',    type:'ielts' },
+  { id:'trans',   name:'Transcription',        type:'ielts' },
+  { id:'listen',  name:'Listening',            type:'ielts' },
+  { id:'read-w',  name:'Reading Warm-up',      type:'ielts' },
+  { id:'speed',   name:'Speed Reading',        type:'ielts' },
+  { id:'para',    name:'Paragraph Analysis',   type:'ielts' },
+  { id:'read',    name:'Reading',              type:'ielts' },
+  { id:'gram',    name:'Grammar',              type:'ielts' },
+  { id:'spell',   name:'Spelling',             type:'ielts' },
+  // Uni (user-defined, starting empty)
+];
+
+// data[weekKey][taskId][dayIdx] = { planned:{from,to}, actual:{from,to} }
+let data = {};
+let currentWeek = 0;
+let currentSection = 'all';
+
+// modal state
+let modalState = { taskId: null, dayIdx: null, mode: 'plan', hasEntry: false };
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function weekKey(w) { return `w${w}`; }
+function initWeek(w) {
+  const k = weekKey(w);
+  if (!data[k]) data[k] = {};
+}
+function getCell(w, taskId, dayIdx) {
+  const k = weekKey(w);
+  if (!data[k]) return null;
+  if (!data[k][taskId]) return null;
+  return data[k][taskId][dayIdx] || null;
+}
+function setCell(w, taskId, dayIdx, val) {
+  const k = weekKey(w);
+  if (!data[k]) data[k] = {};
+  if (!data[k][taskId]) data[k][taskId] = {};
+  data[k][taskId][dayIdx] = val;
+}
+
+function parseTime(t) { // returns minutes from midnight
+  if (!t) return null;
+  const [h,m] = t.split(':').map(Number);
+  return h*60+m;
+}
+function minToHHMM(m) {
+  if (m == null || m <= 0) return '—';
+  const h = Math.floor(m/60), mm = m%60;
+  if (h === 0) return `${mm} دقیقه`;
+  if (mm === 0) return `${h}:۰۰`;
+  return `${h}:${String(mm).padStart(2,'0')}`;
+}
+function duration(entry) {
+  if (!entry || !entry.from || !entry.to) return 0;
+  const d = parseTime(entry.to) - parseTime(entry.from);
+  return d > 0 ? d : 0;
+}
+function formatRange(entry) {
+  if (!entry || !entry.from || !entry.to) return '';
+  return `${entry.from} — ${entry.to}`;
+}
+
+// weekly total for a task (actual if exists, else planned)
+function taskWeeklyTotal(taskId, week) {
+  let total = 0;
+  for (let d=0;d<7;d++) {
+    const cell = getCell(week, taskId, d);
+    if (!cell) continue;
+    const act = cell.actual ? duration(cell.actual) : 0;
+    const pl = cell.planned ? duration(cell.planned) : 0;
+    total += act || pl;
+  }
+  return total;
+}
+
+// daily IELTS total (actual if exists else planned)
+function dayIeltsTotal(dayIdx, week) {
+  let t = 0;
+  tasks.filter(x=>x.type==='ielts').forEach(tk => {
+    const cell = getCell(week, tk.id, dayIdx);
+    if (!cell) return;
+    const act = cell.actual ? duration(cell.actual) : 0;
+    const pl = cell.planned ? duration(cell.planned) : 0;
+    t += act || pl;
+  });
+  return t;
+}
+function dayUniTotal(dayIdx, week) {
+  let t = 0;
+  tasks.filter(x=>x.type==='uni').forEach(tk => {
+    const cell = getCell(week, tk.id, dayIdx);
+    if (!cell) return;
+    const act = cell.actual ? duration(cell.actual) : 0;
+    const pl = cell.planned ? duration(cell.planned) : 0;
+    t += act || pl;
+  });
+  return t;
+}
+
+function ieltsClass(mins) {
+  if (mins < 120) return 'low';
+  if (mins < 240) return 'mid';
+  return 'high';
+}
+
+// ═══════════════════════════════════════════
+// WEEK NAVIGATION
+// ═══════════════════════════════════════════
+const weekLabels = [
+  'هفته ۱ — اسفند ۱۴۰۳',
+  'هفته ۲ — اسفند ۱۴۰۳',
+  'هفته ۳ — اسفند ۱۴۰۳',
+  'هفته ۴ — اسفند ۱۴۰۳',
+];
+function changeWeek(dir) {
+  currentWeek = Math.max(0, Math.min(3, currentWeek + dir));
+  render();
+}
+function setSection(s, el) {
+  currentSection = s;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function render() {
+  renderGauges();
+  renderGrid();
+  renderHeaderStats();
+}
+
+function renderHeaderStats() {
+  const el = document.getElementById('headerStats');
+  // weekly totals
+  let iTotal = 0, uTotal = 0;
+  for (let d=0;d<7;d++) { iTotal += dayIeltsTotal(d,currentWeek); uTotal += dayUniTotal(d,currentWeek); }
+  const ic = ieltsClass(Math.round(iTotal/7)); // average
+  const cls = ic === 'high' ? 'hstat-ielts-high' : ic === 'low' ? 'hstat-ielts-low' : 'hstat-ielts-mid';
+  el.innerHTML = `
+    <div class="hstat ${cls}">📚 آیلتس هفته: ${minToHHMM(iTotal)}</div>
+    <div class="hstat hstat-uni">🎓 دانشگاه هفته: ${minToHHMM(uTotal)}</div>
+  `;
+  document.getElementById('weekLabel').textContent = weekLabels[currentWeek] || `هفته ${currentWeek+1}`;
+}
+
+function renderGauges() {
+  const el = document.getElementById('gauges');
+  let bestDay = 0, bestDayIdx = 0;
+  let totalIelts = 0;
+  for(let d=0;d<7;d++){
+    const t = dayIeltsTotal(d, currentWeek);
+    totalIelts += t;
+    if(t > bestDay){ bestDay = t; bestDayIdx = d; }
+  }
+  let totalUni = 0;
+  for(let d=0;d<7;d++) totalUni += dayUniTotal(d, currentWeek);
+  const avgIelts = Math.round(totalIelts/7);
+  const acls = ieltsClass(avgIelts);
+  const avgColor = acls==='high'?'var(--green)':acls==='low'?'var(--red)':'var(--mid)';
+  const avgBg = acls==='high'?'var(--green-soft)':acls==='low'?'var(--red-soft)':'var(--surface)';
+
+  el.innerHTML = `
+    <div class="gauge-card">
+      <div class="gauge-icon" style="background:var(--blue-soft)">📚</div>
+      <div class="gauge-info">
+        <div class="gauge-label">کل آیلتس هفته</div>
+        <div class="gauge-val" style="color:var(--blue)">${minToHHMM(totalIelts)}</div>
+        <div class="gauge-sub">${DAYS.filter((_,i)=>dayIeltsTotal(i,currentWeek)>0).length} روز فعال</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-icon" style="background:${avgBg}">📊</div>
+      <div class="gauge-info">
+        <div class="gauge-label">میانگین روزانه آیلتس</div>
+        <div class="gauge-val" style="color:${avgColor}">${minToHHMM(avgIelts)}</div>
+        <div class="gauge-sub">هدف: ۴ ساعت</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-icon" style="background:var(--green-soft)">🏆</div>
+      <div class="gauge-info">
+        <div class="gauge-label">بهترین روز</div>
+        <div class="gauge-val" style="color:var(--green)">${bestDay>0?DAYS[bestDayIdx]:'—'}</div>
+        <div class="gauge-sub">${bestDay>0?minToHHMM(bestDay):''}</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-icon" style="background:var(--orange-soft)">🎓</div>
+      <div class="gauge-info">
+        <div class="gauge-label">کل دانشگاه هفته</div>
+        <div class="gauge-val" style="color:var(--orange)">${minToHHMM(totalUni)}</div>
+        <div class="gauge-sub">${DAYS.filter((_,i)=>dayUniTotal(i,currentWeek)>0).length} روز فعال</div>
+      </div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-icon" style="background:var(--purple-soft)">⏱</div>
+      <div class="gauge-info">
+        <div class="gauge-label">کل مطالعه هفته</div>
+        <div class="gauge-val" style="color:var(--purple)">${minToHHMM(totalIelts+totalUni)}</div>
+        <div class="gauge-sub">آیلتس + دانشگاه</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid() {
+  const tbl = document.getElementById('weeklyGrid');
+  let filtered = tasks;
+  if (currentSection === 'ielts') filtered = tasks.filter(t=>t.type==='ielts');
+  if (currentSection === 'uni') filtered = tasks.filter(t=>t.type==='uni');
+
+  let html = '';
+
+  // THEAD
+  html += '<thead><tr>';
+  html += '<th><div style="padding:10px 14px;text-align:right;font-size:11px;color:rgba(255,255,255,0.4);font-weight:600">آیتم / جمع هفته</div></th>';
+  for (let d=0;d<7;d++){
+    const ielts = dayIeltsTotal(d, currentWeek);
+    const cls = ieltsClass(ielts);
+    const uni = dayUniTotal(d, currentWeek);
+    html += `<th>
+      <div class="day-header">
+        <div class="dh-name">${DAYS[d]}</div>
+        <div class="dh-date">${DATES[d]} اسفند</div>
+        ${ielts>0 ? `<div class="dh-total dht-${cls}">📚 ${minToHHMM(ielts)}</div>` : ''}
+        ${uni>0 ? `<div class="dh-total dht-mid" style="background:rgba(234,88,12,0.2);color:#fb923c">🎓 ${minToHHMM(uni)}</div>` : ''}
+      </div>
+    </th>`;
+  }
+  html += '</tr></thead>';
+
+  // TBODY
+  html += '<tbody>';
+
+  const ielts = filtered.filter(t=>t.type==='ielts');
+  const uni = filtered.filter(t=>t.type==='uni');
+
+  if (ielts.length > 0) {
+    html += `<tr class="section-header-row ielts-section"><td colspan="8">IELTS — آمادگی آزمون</td></tr>`;
+    ielts.forEach(task => { html += renderTaskRow(task); });
+  }
+  if (uni.length > 0) {
+    html += `<tr class="section-header-row uni-section"><td colspan="8">دانشگاه و مقاله</td></tr>`;
+    uni.forEach(task => { html += renderTaskRow(task); });
+  }
+  if (filtered.length === 0) {
+    html += `<tr><td colspan="8" style="padding:30px;text-align:center;color:var(--muted)">هنوز آیتمی تعریف نشده. از دکمه «مدیریت آیتم‌ها» اضافه کنید.</td></tr>`;
+  }
+
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+function renderTaskRow(task) {
+  const weekly = taskWeeklyTotal(task.id, currentWeek);
+  const typeClass = task.type === 'ielts' ? 'twk-ielts' : 'twk-uni';
+  let html = `<tr class="task-row">`;
+
+  // Name cell
+  html += `<td class="task-name-cell">
+    <div class="tn-top">
+      <div class="tn-name">${task.name}</div>
+      ${weekly > 0 ? `<div class="tn-weekly ${typeClass}">${minToHHMM(weekly)}</div>` : ''}
+    </div>
+  </td>`;
+
+  // Day cells
+  for (let d=0;d<7;d++) {
+    const cell = getCell(currentWeek, task.id, d);
+    html += `<td>`;
+    html += `<div class="day-cell" onclick="openModal('${task.id}',${d})">`;
+    if (cell && (cell.planned || cell.actual)) {
+      // planned
+      if (cell.planned && cell.planned.from && cell.planned.to) {
+        const dur = duration(cell.planned);
+        html += `<div class="entry-block entry-planned">
+          <button class="entry-del" onclick="event.stopPropagation();deleteEntryDirect('${task.id}',${d},'planned')">✕</button>
+          <div class="entry-label">برنامه</div>
+          <div class="entry-time">${formatRange(cell.planned)}</div>
+          <div class="entry-dur">${minToHHMM(dur)}</div>
+        </div>`;
+      }
+      // actual
+      if (cell.actual && cell.actual.from && cell.actual.to) {
+        const dur = duration(cell.actual);
+        const plDur = cell.planned ? duration(cell.planned) : 0;
+        const actDur = duration(cell.actual);
+        const diff = actDur - plDur;
+        html += `<div class="entry-block entry-actual">
+          <button class="entry-del" onclick="event.stopPropagation();deleteEntryDirect('${task.id}',${d},'actual')">✕</button>
+          <div class="entry-label">واقعی</div>
+          <div class="entry-time">${formatRange(cell.actual)}</div>
+          <div class="entry-dur">${minToHHMM(dur)}</div>
+        </div>`;
+        if (plDur > 0) {
+          if (diff > 0) html += `<div class="diff-line diff-plus">+${minToHHMM(diff)} بیشتر</div>`;
+          else if (diff < 0) html += `<div class="diff-line diff-minus">${minToHHMM(-diff)} کمتر</div>`;
+          else html += `<div class="diff-line diff-zero">= برابر</div>`;
+        }
+      }
+    } else {
+      html += `<div class="add-hint">+</div>`;
+    }
+    html += `</div></td>`;
+  }
+  html += `</tr>`;
+  return html;
+}
+
+// ═══════════════════════════════════════════
+// MODAL — ENTRY
+// ═══════════════════════════════════════════
+function openModal(taskId, dayIdx) {
+  const task = tasks.find(t=>t.id===taskId);
+  modalState = { taskId, dayIdx, mode: 'plan' };
+  document.getElementById('modalTitle').textContent = task.name;
+  document.getElementById('modalSubtitle').textContent = `${DAYS[dayIdx]}، ${DATES[dayIdx]} اسفند`;
+  
+  const cell = getCell(currentWeek, taskId, dayIdx);
+  // pre-fill if existing
+  if (cell && cell.planned && cell.planned.from) {
+    document.getElementById('inputFrom').value = cell.planned.from;
+    document.getElementById('inputTo').value = cell.planned.to;
+  } else {
+    document.getElementById('inputFrom').value = '';
+    document.getElementById('inputTo').value = '';
+  }
+  
+  setMode('plan');
+  const hasAny = cell && (cell.planned?.from || cell.actual?.from);
+  document.getElementById('deleteBtn').style.display = hasAny ? 'block' : 'none';
+  calcDuration();
+  document.getElementById('entryModal').classList.add('open');
+  setTimeout(()=>document.getElementById('inputFrom').focus(),200);
+}
+
+function setMode(m) {
+  modalState.mode = m;
+  const cell = getCell(currentWeek, modalState.taskId, modalState.dayIdx);
+  document.getElementById('modePlan').className = 'mt-btn' + (m==='plan'?' active-plan':'');
+  document.getElementById('modeActual').className = 'mt-btn' + (m==='actual'?' active-actual':'');
+  // fill fields
+  const entry = m==='plan' ? cell?.planned : cell?.actual;
+  document.getElementById('inputFrom').value = entry?.from || '';
+  document.getElementById('inputTo').value = entry?.to || '';
+  // style inputs
+  document.querySelectorAll('.form-input[type=time]').forEach(el=>{
+    el.className = 'form-input' + (m==='actual'?' purple':'');
+  });
+  calcDuration();
+}
+
+function calcDuration() {
+  const from = document.getElementById('inputFrom').value;
+  const to = document.getElementById('inputTo').value;
+  const d = parseTime(to) - parseTime(from);
+  document.getElementById('durationDisplay').textContent = (from && to && d > 0) ? minToHHMM(d) : '—';
+}
+
+function saveEntry() {
+  const from = document.getElementById('inputFrom').value;
+  const to = document.getElementById('inputTo').value;
+  if (!from || !to) return;
+  const d = parseTime(to) - parseTime(from);
+  if (d <= 0) { alert('ساعت پایان باید بعد از ساعت شروع باشد.'); return; }
+
+  const { taskId, dayIdx, mode } = modalState;
+  initWeek(currentWeek);
+  const k = weekKey(currentWeek);
+  if (!data[k][taskId]) data[k][taskId] = {};
+  if (!data[k][taskId][dayIdx]) data[k][taskId][dayIdx] = {};
+  data[k][taskId][dayIdx][mode === 'plan' ? 'planned' : 'actual'] = { from, to };
+
+  closeModal();
+  render();
+}
+
+function deleteEntry() {
+  const { taskId, dayIdx } = modalState;
+  const k = weekKey(currentWeek);
+  if (data[k]?.[taskId]?.[dayIdx]) {
+    delete data[k][taskId][dayIdx];
+  }
+  closeModal();
+  render();
+}
+
+function deleteEntryDirect(taskId, dayIdx, type) {
+  const k = weekKey(currentWeek);
+  if (data[k]?.[taskId]?.[dayIdx]) {
+    if (type === 'planned') delete data[k][taskId][dayIdx].planned;
+    if (type === 'actual') delete data[k][taskId][dayIdx].actual;
+    // clean up empty
+    const cell = data[k][taskId][dayIdx];
+    if (!cell.planned && !cell.actual) delete data[k][taskId][dayIdx];
+  }
+  render();
+}
+
+function closeModal() {
+  document.getElementById('entryModal').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════
+// MODAL — TASK MGMT
+// ═══════════════════════════════════════════
+function openTaskMgmt() {
+  renderTaskMgmt();
+  document.getElementById('taskModal').classList.add('open');
+}
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('open');
+  render();
+}
+function renderTaskMgmt() {
+  const el = document.getElementById('taskMgmtList');
+  if (tasks.length === 0) { el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px">هنوز آیتمی وجود ندارد</div>'; return; }
+  el.innerHTML = tasks.map((t,i) => `
+    <div class="task-mgmt-item">
+      <div class="tm-name">${t.name}</div>
+      <div class="tm-type tm-type-${t.type}">${t.type==='ielts'?'IELTS':'دانشگاه'}</div>
+      <button class="tm-del" onclick="removeTask('${t.id}')">✕</button>
+    </div>
+  `).join('');
+}
+function addTask() {
+  const name = document.getElementById('newTaskName').value.trim();
+  const type = document.getElementById('newTaskType').value;
+  if (!name) return;
+  const id = 'custom_' + Date.now();
+  tasks.push({ id, name, type });
+  document.getElementById('newTaskName').value = '';
+  renderTaskMgmt();
+}
+function removeTask(id) {
+  tasks = tasks.filter(t=>t.id!==id);
+  renderTaskMgmt();
+}
+
+// close modal on overlay click
+document.getElementById('entryModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.getElementById('taskModal').addEventListener('click', function(e){ if(e.target===this) closeTaskModal(); });
+
+// ═══════════════════════════════════════════
+// SEED DEMO DATA
+// ═══════════════════════════════════════════
+function seedDemo() {
+  initWeek(0);
+  // Day 0 (Shanbe)
+  setCell(0,'wt2',0,{ planned:{from:'10:30',to:'12:15'}, actual:{from:'10:45',to:'12:30'} });
+  setCell(0,'vocab',0,{ planned:{from:'08:00',to:'08:30'}, actual:{from:'08:00',to:'08:35'} });
+  setCell(0,'read',0,{ planned:{from:'16:00',to:'17:30'}, actual:{from:'16:10',to:'17:20'} });
+  // Day 1 (Yek-shanbe)
+  setCell(0,'vocab',1,{ planned:{from:'08:00',to:'08:30'}, actual:{from:'08:15',to:'08:45'} });
+  setCell(0,'shadow',1,{ planned:{from:'09:00',to:'09:30'}, actual:{from:'09:00',to:'09:20'} });
+  setCell(0,'wt2',1,{ planned:{from:'14:00',to:'15:00'}, actual:{from:'14:00',to:'14:45'} });
+  // Day 2 (Do-shanbe)
+  setCell(0,'listen',2,{ planned:{from:'10:00',to:'11:00'}, actual:{from:'10:00',to:'10:45'} });
+  // Day 3 (Se-shanbe) — great day
+  setCell(0,'vocab',3,{ planned:{from:'07:30',to:'08:00'}, actual:{from:'07:30',to:'08:00'} });
+  setCell(0,'wt2',3,{ planned:{from:'09:00',to:'11:30'}, actual:{from:'09:00',to:'11:30'} });
+  setCell(0,'read',3,{ planned:{from:'14:00',to:'16:00'}, actual:{from:'14:00',to:'16:00'} });
+  // Add a demo uni task
+  tasks.push({ id:'paper_edit', name:'ویرایش مقاله', type:'uni' });
+  tasks.push({ id:'class_prep', name:'آماده‌سازی کلاس', type:'uni' });
+  setCell(0,'paper_edit',0,{ planned:{from:'20:00',to:'22:00'}, actual:{from:'20:30',to:'22:00'} });
+  setCell(0,'paper_edit',1,{ planned:{from:'20:00',to:'21:30'} });
+  setCell(0,'class_prep',3,{ planned:{from:'18:00',to:'19:30'}, actual:{from:'18:00',to:'19:30'} });
+}
+
+seedDemo();
+render();
+</script>
+</body>
+</html>

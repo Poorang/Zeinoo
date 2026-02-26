@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه‌یار هفتگی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f7f5;--white:#fff;--surface:#f2f1ef;--border:#e5e3df;--border2:#d4d1cc;
+  --ink:#1c1917;--mid:#44403c;--muted:#78716c;--faint:#a8a29e;
+  --blue:#2563eb;--blue-soft:#eff6ff;--blue-border:#bfdbfe;
+  --purple:#7c3aed;--purple-soft:#f5f3ff;--purple-border:#ddd6fe;
+  --green:#16a34a;--green-soft:#f0fdf4;--green-border:#bbf7d0;
+  --red:#dc2626;--red-soft:#fef2f2;--red-border:#fecaca;
+  --orange:#ea580c;--orange-soft:#fff7ed;--orange-border:#fed7aa;
+  --yellow:#ca8a04;--yellow-soft:#fefce8;--yellow-border:#fde047;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+  --shadow:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.05);
+  --shadow-lg:0 10px 32px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+  --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:13px;}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* HEADER */
+.hdr{background:var(--white);border-bottom:1px solid var(--border);padding:0 18px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:var(--shadow-sm);z-index:20;}
+.logo{font-size:16px;font-weight:900;letter-spacing:-.8px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);}
+.logo span{color:var(--blue);}
+
+.cal-btn{display:flex;align-items:center;gap:7px;padding:5px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'Vazirmatn',sans-serif;font-size:12px;font-weight:600;color:var(--mid);transition:all .15s;}
+.cal-btn:hover{background:var(--border);}
+.cal-btn .cw{color:var(--blue);}
+
+.hstats{display:flex;gap:5px;margin-right:auto;}
+.hs{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;font-size:11px;font-weight:700;border:1px solid transparent;white-space:nowrap;}
+.hs-hi{background:var(--green-soft);color:var(--green);border-color:var(--green-border);}
+.hs-mi{background:var(--surface);color:var(--mid);border-color:var(--border);}
+.hs-lo{background:var(--red-soft);color:var(--red);border-color:var(--red-border);}
+.hs-un{background:var(--orange-soft);color:var(--orange);border-color:var(--orange-border);}
+
+.sync-wrap{display:flex;align-items:center;gap:5px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);transition:background .3s;}
+.sync-dot.syncing{background:var(--yellow);animation:pulse .8s infinite;}
+.sync-dot.synced{background:var(--green);}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.sync-lbl{font-size:10px;color:var(--faint);}
+
+.stabs{display:flex;gap:2px;background:var(--surface);border-radius:7px;padding:2px;}
+.stab{padding:4px 11px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'Vazirmatn',sans-serif;transition:all .15s;}
+.stab.active{background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm);}
+
+/* BODY */
+.body{flex:1;overflow:auto;padding:14px 18px;}
+
+/* GAUGES */
+.gauges{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;}
+.gc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);}
+.gi{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.gl{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.gv{font-size:18px;font-weight:800;letter-spacing:-.5px;line-height:1.1;}
+.gs{font-size:10px;color:var(--faint);margin-top:1px;}
+
+/* GRID WRAP */
+.gw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;}
+.gscroll{overflow-x:auto;}
+table.wg{width:100%;border-collapse:collapse;min-width:840px;}
+
+/* thead */
+.wg thead th{background:var(--ink);color:white;padding:0;font-weight:600;position:sticky;top:0;z-index:5;}
+.wg thead th:first-child{width:166px;min-width:166px;}
+.dh{padding:8px 7px 6px;text-align:center;}
+.dh-name{font-size:11px;font-weight:700;}
+.dh-date{font-size:10px;color:rgba(255,255,255,.38);margin-top:1px;}
+.dh-today{font-size:9px;color:#fbbf24;font-weight:700;margin-top:1px;}
+.dh-tots{display:flex;flex-direction:column;gap:2px;margin-top:5px;align-items:center;}
+.dht{display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:9px;font-size:10px;font-weight:700;}
+.dht-hi{background:rgba(22,163,74,.25);color:#4ade80;}
+.dht-mi{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);}
+.dht-lo{background:rgba(220,38,38,.3);color:#fca5a5;}
+.dht-un{background:rgba(234,88,12,.2);color:#fb923c;}
+
+/* section rows */
+.sr td{background:#f0eeec;padding:5px 12px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
+.sr.ielts td{color:var(--blue);background:#f0f5ff;}
+.sr.uni td{color:var(--orange);background:#fff8f2;}
+
+/* task rows */
+.tr td{border-bottom:1px solid var(--border);vertical-align:top;padding:0;}
+.tr:last-child td{border-bottom:none;}
+.tr:hover td{background:#fafaf9;}
+
+/* task name cell */
+.tnc{padding:7px 11px;position:sticky;right:0;background:var(--white);z-index:2;border-left:1px solid var(--border);}
+.tr:hover .tnc{background:#fafaf9;}
+.tn-row{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;}
+.tn-name{font-size:11px;font-weight:600;color:var(--mid);line-height:1.3;}
+.tn-wk{font-size:10px;font-weight:700;padding:2px 5px;border-radius:7px;white-space:nowrap;flex-shrink:0;}
+.tn-i{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border);}
+.tn-u{background:var(--orange-soft);color:var(--orange);border:1px solid var(--orange-border);}
+
+/* day cell */
+.dc{padding:4px 5px;min-width:108px;min-height:60px;cursor:pointer;position:relative;transition:background .12s;}
+.dc:hover{background:var(--blue-soft);}
+.dc.tc{background:rgba(37,99,235,.03);}
+
+/* entry blocks */
+.eb{border-radius:5px;padding:3px 6px;margin-bottom:3px;position:relative;}
+.eb-pl{background:var(--blue-soft);border:1px solid var(--blue-border);}
+.eb-ac{background:var(--purple-soft);border:1px solid var(--purple-border);}
+.ebl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:1px;}
+.eb-pl .ebl{color:var(--blue);}
+.eb-ac .ebl{color:var(--purple);}
+.ebt{font-size:11px;font-weight:600;color:var(--mid);}
+.ebd{font-size:10px;color:var(--muted);margin-top:1px;}
+.cmt-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--yellow);margin-right:2px;vertical-align:middle;}
+
+/* delay badges */
+.delay{display:inline-flex;align-items:center;gap:2px;padding:2px 5px;border-radius:4px;font-size:9px;font-weight:700;margin-top:2px;cursor:pointer;}
+.d-st{background:var(--red-soft);border:1px solid var(--red-border);color:var(--red);}
+.d-en{background:var(--yellow-soft);border:1px solid var(--yellow-border);color:var(--yellow);}
+
+/* diff */
+.diff{text-align:center;font-size:10px;font-weight:700;padding:1px 0;}
+.d-more{color:var(--green);}
+.d-less{color:var(--red);}
+.d-eq{color:var(--faint);}
+
+/* add hint */
+.ah{display:flex;align-items:center;justify-content:center;height:100%;min-height:52px;color:var(--border);font-size:18px;transition:color .15s;}
+.dc:hover .ah{color:var(--blue);}
+
+/* entry delete */
+.edel{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:3px;background:rgba(0,0,0,.07);border:none;cursor:pointer;font-size:8px;display:none;align-items:center;justify-content:center;color:var(--muted);}
+.eb:hover .edel{display:flex;}
+.edel:hover{background:var(--red-soft);color:var(--red);}
+
+/* cell comment row */
+.cmt-row{font-size:10px;color:var(--faint);margin-top:2px;padding:2px 4px;border-top:1px dashed var(--border);line-height:1.3;}
+
+/* grid footer */
+.gf{padding:7px 13px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--surface);flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
+.ld{width:8px;height:8px;border-radius:2px;}
+.atb{margin-right:auto;display:flex;align-items:center;gap:4px;padding:5px 11px;background:var(--blue);color:white;border:none;border-radius:7px;font-size:11px;font-weight:700;font-family:'Vazirmatn',sans-serif;cursor:pointer;}
+.atb:hover{background:#1d4ed8;}
+
+/* CONTEXT MENU */
+.ctx{position:fixed;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:300;min-width:175px;overflow:hidden;display:none;}
+.ctx.open{display:block;}
+.ci{padding:9px 13px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s;}
+.ci:hover{background:var(--surface);}
+.ci.danger{color:var(--red);}
+.ci.danger:hover{background:var(--red-soft);}
+.csep{border-top:1px solid var(--border);margin:3px 0;}
+
+/* CALENDAR POPUP */
+.calpop{position:fixed;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);z-index:200;width:290px;overflow:hidden;display:none;}
+.calpop.open{display:block;}
+.cph{background:var(--ink);color:white;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;}
+.cph-title{font-size:13px;font-weight:800;}
+.cpnav{display:flex;gap:5px;}
+.cpnav button{width:25px;height:25px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:white;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.cpnav button:hover{background:rgba(255,255,255,.15);}
+.cpdow{display:grid;grid-template-columns:repeat(7,1fr);padding:7px 9px 3px;}
+.cpdow div{text-align:center;font-size:9px;font-weight:700;color:var(--muted);padding:2px 0;}
+.cpdays{display:grid;grid-template-columns:repeat(7,1fr);padding:0 9px 9px;gap:2px;}
+.cpd{text-align:center;padding:5px 1px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;transition:all .12s;}
+.cpd:hover{background:var(--blue-soft);color:var(--blue);}
+.cpd.today{background:var(--blue);color:white;font-weight:800;}
+.cpd.inweek{background:var(--blue-soft);color:var(--blue);font-weight:700;}
+.cpd.inweek.today{background:var(--blue);color:white;}
+.cpd.empty,.cpd.empty:hover{background:transparent;cursor:default;}
+.cpd.om{color:var(--faint);}
+.cpfooter{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-top:1px solid var(--border);}
+.cpfooter span{font-size:11px;font-weight:600;color:var(--mid);}
+.cpfooter button{padding:4px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Vazirmatn',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
+.cpfooter .ok{background:var(--blue);color:white;border-color:var(--blue);}
+
+/* OVERLAY & MODAL */
+.overlay{position:fixed;inset:0;background:rgba(28,25,23,.4);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--white);border-radius:16px;width:430px;max-width:95vw;box-shadow:var(--shadow-lg);overflow:hidden;transform:translateY(8px) scale(.98);transition:transform .2s;}
+.overlay.open .modal{transform:none;}
+.mhd{padding:14px 17px 11px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mtitle{font-size:14px;font-weight:800;letter-spacing:-.3px;}
+.msub{font-size:11px;color:var(--muted);margin-top:1px;}
+.mclose{width:27px;height:27px;border:1px solid var(--border);border-radius:7px;background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.mclose:hover{background:var(--surface);}
+.mbody{padding:14px 17px;display:flex;flex-direction:column;gap:11px;}
+.mft{padding:11px 17px;border-top:1px solid var(--border);display:flex;gap:7px;justify-content:flex-end;}
+
+.mt{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:8px;padding:3px;gap:2px;}
+.mtb{padding:8px;border-radius:6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;font-family:'Vazirmatn',sans-serif;color:var(--muted);transition:all .15s;}
+.mtb.ap{background:var(--white);color:var(--blue);box-shadow:var(--shadow-sm);}
+.mtb.aa{background:var(--white);color:var(--purple);box-shadow:var(--shadow-sm);}
+
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.fi{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink);font-family:'Vazirmatn',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:var(--white);}
+.fi.pu:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+textarea.fi{resize:vertical;min-height:58px;}
+
+.durpv{background:var(--surface);border-radius:8px;padding:8px 11px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+.durpv strong{color:var(--ink);font-size:14px;font-weight:800;}
+
+.delay-sec{background:var(--red-soft);border:1px solid var(--red-border);border-radius:8px;padding:9px 11px;}
+.delay-sec-title{font-size:11px;font-weight:800;color:var(--red);margin-bottom:6px;}
+.delay-info{font-size:11px;color:var(--mid);margin-bottom:6px;line-height:1.5;}
+
+.btn{padding:8px 17px;border-radius:8px;font-size:13px;font-weight:700;font-family:'Vazirmatn',sans-serif;cursor:pointer;border:1px solid transparent;transition:all .15s;}
+.btn-g{background:var(--surface);color:var(--mid);border-color:var(--border);}
+.btn-g:hover{background:var(--border);}
+.btn-p{background:var(--blue);color:white;}
+.btn-p:hover{background:#1d4ed8;}
+.btn-d{background:var(--red-soft);color:var(--red);border-color:var(--red-border);}
+.btn-d:hover{background:var(--red-border);}
+
+/* task mgmt */
+.tml{max-height:270px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
+.tmi{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--surface);border-radius:7px;border:1px solid var(--border);}
+.tmi-n{font-size:12px;font-weight:500;flex:1;}
+.tmi-t{font-size:10px;font-weight:700;padding:2px 6px;border-radius:7px;}
+.ti{background:var(--blue-soft);color:var(--blue);}
+.tu{background:var(--orange-soft);color:var(--orange);}
+.tmi-d{width:21px;height:21px;border:1px solid var(--border);background:var(--white);border-radius:5px;cursor:pointer;color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;}
+.tmi-d:hover{background:var(--red-soft);border-color:var(--red-border);color:var(--red);}
+.atf{display:flex;gap:6px;margin-top:7px;}
+.ts{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;font-size:12px;color:var(--ink);font-family:'Vazirmatn',sans-serif;outline:none;width:95px;}
+
+/* loading */
+.loading{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:14px;font-weight:600;color:var(--mid);}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div id="LS" class="loading"><div class="spinner"></div>در حال اتصال به Firebase...</div>
+
+<div class="app" style="display:none" id="APP">
+  <div class="hdr">
+    <div class="logo"><div class="logo-dot"></div>برنامه<span>یار</span></div>
+    <button class="cal-btn" id="calBtn" onclick="toggleCal()">
+      <span>📅</span><span class="cw" id="calBtnTxt">انتخاب هفته</span><span>▾</span>
+    </button>
+    <div class="hstats" id="hstats"></div>
+    <div class="sync-wrap">
+      <div class="sync-dot" id="sdot"></div>
+      <span class="sync-lbl" id="slbl">—</span>
+    </div>
+    <div class="stabs">
+      <button class="stab active" onclick="setSec('all',this)">همه</button>
+      <button class="stab" onclick="setSec('ielts',this)">IELTS</button>
+      <button class="stab" onclick="setSec('uni',this)">دانشگاه</button>
+    </div>
+  </div>
+  <div class="body">
+    <div class="gauges" id="gauges"></div>
+    <div class="gw">
+      <div class="gscroll"><table class="wg" id="grid"></table></div>
+      <div class="gf">
+        <div class="li"><div class="ld" style="background:var(--blue-soft);border:1px solid var(--blue-border)"></div>برنامه</div>
+        <div class="li"><div class="ld" style="background:var(--purple-soft);border:1px solid var(--purple-border)"></div>واقعی</div>
+        <div class="li" style="color:var(--green)">↑ بیشتر از برنامه</div>
+        <div class="li" style="color:var(--red)">↓ کمتر از برنامه</div>
+        <div class="li" style="color:var(--red)">⚠ تأخیر شروع</div>
+        <div class="li" style="color:var(--yellow)">⚠ تأخیر پایان</div>
+        <div class="li">راست‌کلیک برای کامنت</div>
+        <button class="atb" onclick="openTM()">⚙ مدیریت آیتم‌ها</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR POPUP -->
+<div class="calpop" id="calpop">
+  <div class="cph">
+    <div class="cph-title" id="cph-title"></div>
+    <div class="cpnav">
+      <button onclick="calMv(-1)">›</button>
+      <button onclick="calMv(1)">‹</button>
+    </div>
+  </div>
+  <div class="cpdow"><div>ش</div><div>ی</div><div>د</div><div>س</div><div>چ</div><div>پ</div><div>ج</div></div>
+  <div class="cpdays" id="cpdays"></div>
+  <div class="cpfooter">
+    <button onclick="gotoToday()">امروز</button>
+    <span id="cpwklbl"></span>
+    <button class="ok" onclick="closeCal()">تأیید ✓</button>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx" id="ctx">
+  <div class="ci" onclick="ctxPlan()">📋 ثبت برنامه</div>
+  <div class="ci" onclick="ctxActual()">✅ ثبت واقعی</div>
+  <div class="csep"></div>
+  <div class="ci" onclick="ctxComment()">💬 افزودن / ویرایش کامنت</div>
+  <div class="csep"></div>
+  <div class="ci danger" onclick="ctxClear()">🗑 پاک کردن سلول</div>
+</div>
+
+<!-- ENTRY MODAL -->
+<div class="overlay" id="eo">
+  <div class="modal">
+    <div class="mhd">
+      <div><div class="mtitle" id="mtitle"></div><div class="msub" id="msub"></div></div>
+      <button class="mclose" onclick="closeEM()">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="mt">
+        <button class="mtb ap" id="mpb" onclick="setMode('plan')">📋 برنامه‌ریزی</button>
+        <button class="mtb" id="mab" onclick="setMode('actual')">✅ ثبت واقعی</button>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">از ساعت</label><input class="fi" type="time" id="iF" oninput="calcD()"></div>
+        <div class="fg"><label class="fl">تا ساعت</label><input class="fi" type="time" id="iT" oninput="calcD()"></div>
+      </div>
+      <div class="durpv"><span>مدت زمان</span><strong id="ddis">—</strong></div>
+      <div id="dsec" style="display:none">
+        <div class="delay-sec">
+          <div class="delay-sec-title">⚠️ تأخیرات نسبت به برنامه</div>
+          <div id="dinfo" class="delay-info"></div>
+          <div class="fg"><label class="fl">دلیل تأخیر (اختیاری)</label><textarea class="fi" id="dcmt" placeholder="چرا تأخیر داشتی؟"></textarea></div>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">یادداشت (اختیاری)</label><textarea class="fi" id="ecmt" placeholder="یادداشت برای این فعالیت..."></textarea></div>
+    </div>
+    <div class="mft">
+      <button class="btn btn-d" id="delB" style="display:none" onclick="delEntry()">حذف</button>
+      <button class="btn btn-g" onclick="closeEM()">انصراف</button>
+      <button class="btn btn-p" onclick="saveE()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMENT MODAL -->
+<div class="overlay" id="co">
+  <div class="modal" style="width:360px;max-width:95vw">
+    <div class="mhd">
+      <div><div class="mtitle">💬 کامنت سلول</div><div class="msub" id="csub"></div></div>
+      <button class="mclose" onclick="closeCM()">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">یادداشت</label><textarea class="fi" id="ccmt" placeholder="یادداشت برای این سلول..." style="min-height:75px"></textarea></div>
+    </div>
+    <div class="mft">
+      <button class="btn btn-g" onclick="closeCM()">انصراف</button>
+      <button class="btn btn-p" onclick="saveCMT()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- TASK MGMT MODAL -->
+<div class="overlay" id="to">
+  <div class="modal">
+    <div class="mhd"><div><div class="mtitle">⚙ مدیریت آیتم‌ها</div></div><button class="mclose" onclick="closeTM()">✕</button></div>
+    <div class="mbody">
+      <div class="tml" id="tml"></div>
+      <div class="atf">
+        <input class="fi" type="text" id="ntn" placeholder="نام آیتم جدید..." style="flex:1">
+        <select class="ts" id="ntt"><option value="ielts">IELTS</option><option value="uni">دانشگاه</option></select>
+        <button class="btn btn-p" onclick="addT()">+افزودن</button>
+      </div>
+    </div>
+    <div class="mft"><button class="btn btn-g" onclick="closeTM()">بستن</button></div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const cfg={apiKey:"AIzaSyDFDEBV8Y5cE3IMm0UcUBjFXlLxz5FylUI",authDomain:"zeinab-b8286.firebaseapp.com",databaseURL:"https://zeinab-b8286-default-rtdb.firebaseio.com",projectId:"zeinab-b8286",storageBucket:"zeinab-b8286.firebasestorage.app",messagingSenderId:"705914930581",appId:"1:705914930581:web:4bd0f90f2625e07629229c"};
+const app=initializeApp(cfg); const db=getDatabase(app);
+window._fbSet=(path,val)=>set(ref(db,path),val);
+window._fbListen=(path,cb)=>onValue(ref(db,path),snap=>cb(snap.val()));
+window._fbListen('/',(val)=>{
+  const first=!window._fbReady;
+  if(val){
+    if(val.tasks&&Array.isArray(val.tasks)) window.TK=val.tasks;
+    if(val.data) window.DB=val.data;
+    if(val.comments) window.CM=val.comments;
+  }
+  window._fbReady=true;
+  if(first){document.getElementById('LS').style.display='none';document.getElementById('APP').style.display='flex';setSS('synced');initApp();}
+  else{setSS('synced');render();}
+});
+setTimeout(()=>{if(!window._fbReady)document.getElementById('LS').innerHTML='<div style="color:#dc2626">⚠️ خطا در اتصال. صفحه را رفرش کنید.</div>';},9000);
+</script>
+
+<script>
+// ═══ PERSIAN CALENDAR ═══
+const PM=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const PD=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];
+function toJ(gy,gm,gd){let jy,jm,jd,g_d_no,j_d_no,j_np,i;gy-=1600;gm-=1;gd-=1;g_d_no=365*gy+Math.floor((gy+3)/4)-Math.floor((gy+99)/100)+Math.floor((gy+399)/400);for(i=0;i<gm;i++)g_d_no+=[31,28+((gy+1600)%4===0&&((gy+1600)%100!==0||(gy+1600)%400===0)?1:0),31,30,31,30,31,31,30,31,30,31][i];g_d_no+=gd;j_d_no=g_d_no-79;j_np=Math.floor(j_d_no/12053);j_d_no%=12053;jy=979+33*j_np+4*Math.floor(j_d_no/1461);j_d_no%=1461;if(j_d_no>=366){jy+=Math.floor((j_d_no-1)/365);j_d_no=(j_d_no-1)%365;}for(i=0;i<11&&j_d_no>=[31,31,31,31,31,31,30,30,30,30,30][i];i++)j_d_no-=[31,31,31,31,31,31,30,30,30,30,30][i];jm=i+1;jd=j_d_no+1;return{y:jy,m:jm,d:jd};}
+function toG(jy,jm,jd){jy+=1595;jm-=1;jd-=1;let jdn=365*jy+Math.floor((jy/33))*8+Math.floor(((jy%33)+3)/4)+78+jd+(jm<7?(jm-1)*31:Math.floor((jm-7)*30+185)+6);let gy=400*Math.floor((jdn-21)/146097);jdn%=146097;if(jdn>36524){gy+=100*Math.floor((--jdn)/36524);jdn%=36524;if(jdn>=365)jdn++;}gy+=4*Math.floor(jdn/1461);jdn%=1461;if(jdn>364){gy+=Math.floor((jdn-1)/365);jdn=(jdn-1)%365;}let sa=[0,31,29,31,30,31,30,31,31,30,31,30,31];let gd2=jdn+1,gm2;for(gm2=0;gm2<13&&gd2>sa[gm2];gm2++)gd2-=sa[gm2];return{y:gy,m:gm2,d:gd2};}
+function dimJ(y,m){if(m<=6)return 31;if(m<=11)return 30;const g=toG(y,12,29),g2=new Date(g.y,g.m-1,g.d);g2.setDate(g2.getDate()+1);const j=toJ(g2.getFullYear(),g2.getMonth()+1,g2.getDate());return j.m===1?30:29;}
+function jdow(jy,jm,jd){const g=toG(jy,jm,jd);return(new Date(g.y,g.m-1,g.d).getDay()+1)%7;}
+function wkStart(jy,jm,jd){const dow=jdow(jy,jm,jd),g=toG(jy,jm,jd),d=new Date(g.y,g.m-1,g.d);d.setDate(d.getDate()-dow);return toJ(d.getFullYear(),d.getMonth()+1,d.getDate());}
+function wkDays(jy,jm,jd){const days=[],g0=toG(jy,jm,jd),d0=new Date(g0.y,g0.m-1,g0.d);for(let i=0;i<7;i++){const d=new Date(d0);d.setDate(d.getDate()+i);days.push(toJ(d.getFullYear(),d.getMonth()+1,d.getDate()));}return days;}
+function jstr(jy,jm,jd){return`${jy}/${String(jm).padStart(2,'0')}/${String(jd).padStart(2,'0')}`;}
+function pj(s){const[y,m,d]=s.split('/').map(Number);return{y,m,d};}
+function pn(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
+
+// ═══ STATE ═══
+window.TK=[
+  {id:'vocab',name:'Vocabulary (Review)',type:'ielts'},{id:'mistakes',name:'My Mistakes',type:'ielts'},
+  {id:'shadow',name:'Shadowing',type:'ielts'},{id:'sp-prep',name:'Speaking - Preparation',type:'ielts'},
+  {id:'speak',name:'Speaking',type:'ielts'},{id:'sp-rev',name:'Speaking (Review)',type:'ielts'},
+  {id:'wt1s',name:'Writing Task 1 - Sample',type:'ielts'},{id:'wt1',name:'Writing Task 1',type:'ielts'},
+  {id:'wt2s',name:'Writing Task 2 - Sample',type:'ielts'},{id:'wt2',name:'Writing Task 2',type:'ielts'},
+  {id:'lis-w',name:'Listening Warm-up',type:'ielts'},{id:'trans',name:'Transcription',type:'ielts'},
+  {id:'listen',name:'Listening',type:'ielts'},{id:'read-w',name:'Reading Warm-up',type:'ielts'},
+  {id:'speed',name:'Speed Reading',type:'ielts'},{id:'para',name:'Paragraph Analysis',type:'ielts'},
+  {id:'read',name:'Reading',type:'ielts'},{id:'gram',name:'Grammar',type:'ielts'},
+  {id:'spell',name:'Spelling',type:'ielts'},
+];
+window.DB={};   // DB[wk][taskId][dayStr]={planned,actual}
+window.CM={};   // CM[wk][taskId][dayStr]={cell,planned,actual,delayReason}
+
+const _tg=new Date(), _tj=toJ(_tg.getFullYear(),_tg.getMonth()+1,_tg.getDate());
+let CWS=wkStart(_tj.y,_tj.m,_tj.d); // current week start
+let SEC='all';
+let _fbReady=false;
+let calY=CWS.y, calM=CWS.m;
+let MS={tid:null,ds:null,mode:'plan'}; // modal state
+let CS={tid:null,ds:null};             // ctx state
+let CMT_S={tid:null,ds:null};          // comment state
+
+// ═══ FIREBASE HELPERS ═══
+function setSS(s){const d=document.getElementById('sdot'),l=document.getElementById('slbl');d.className='sync-dot '+s;l.textContent=s==='syncing'?'در حال ذخیره..':s==='synced'?'ذخیره شد':'خطا';}
+function saveFB(){setSS('syncing');Promise.all([window._fbSet('tasks',window.TK),window._fbSet('data',window.DB),window._fbSet('comments',window.CM)]).then(()=>setSS('synced')).catch(()=>setSS('error'));}
+window.setSS=setSS;
+
+// ═══ DATA HELPERS ═══
+function wk(){return`w_${CWS.y}_${String(CWS.m).padStart(2,'0')}_${String(CWS.d).padStart(2,'0')}`;}
+function gC(tid,ds){return window.DB?.[wk()]?.[tid]?.[ds]||null;}
+function sC(tid,ds,v){if(!window.DB[wk()])window.DB[wk()]={};if(!window.DB[wk()][tid])window.DB[wk()][tid]={};window.DB[wk()][tid][ds]=v;}
+function gCM(tid,ds){return window.CM?.[wk()]?.[tid]?.[ds]||{};}
+function sCM(tid,ds,v){if(!window.CM[wk()])window.CM[wk()]={};if(!window.CM[wk()][tid])window.CM[wk()][tid]={};window.CM[wk()][tid][ds]=v;}
+
+function pt(t){if(!t)return null;const[h,m]=t.split(':').map(Number);return h*60+m;}
+function ms(m){if(!m||m<=0)return'—';const h=Math.floor(m/60),mm=m%60;if(h===0)return pn(mm)+' دقیقه';if(mm===0)return pn(h)+':۰۰';return pn(h)+':'+pn(String(mm).padStart(2,'0'));}
+function dur(e){if(!e||!e.from||!e.to)return 0;const d=pt(e.to)-pt(e.from);return d>0?d:0;}
+function fr(e){if(!e||!e.from||!e.to)return'';return e.from+' — '+e.to;}
+function dlyCalc(pl,ac){if(!pl||!ac)return null;const r={};if(pl.from&&ac.from){const d=pt(ac.from)-pt(pl.from);if(d>0)r.start=d;}if(pl.to&&ac.to){const d=pt(ac.to)-pt(pl.to);if(d>0)r.end=d;}return Object.keys(r).length?r:null;}
+
+function dayI(ds){let t=0;window.TK.filter(x=>x.type==='ielts').forEach(tk=>{const c=window.DB?.[wk()]?.[tk.id]?.[ds];if(!c)return;t+=dur(c.actual)||dur(c.planned)||0;});return t;}
+function dayU(ds){let t=0;window.TK.filter(x=>x.type==='uni').forEach(tk=>{const c=window.DB?.[wk()]?.[tk.id]?.[ds];if(!c)return;t+=dur(c.actual)||dur(c.planned)||0;});return t;}
+function twt(tid){let t=0;wkDays(CWS.y,CWS.m,CWS.d).forEach(j=>{const c=window.DB?.[wk()]?.[tid]?.[jstr(j.y,j.m,j.d)];if(!c)return;t+=dur(c.actual)||dur(c.planned)||0;});return t;}
+function ic(m){return m<120?'lo':m<240?'mi':'hi';}
+
+// ═══ INIT ═══
+function initApp(){calY=CWS.y;calM=CWS.m;render();renderCal();}
+window.initApp=initApp;
+
+// ═══ RENDER ═══
+function render(){if(!window._fbReady)return;rGauges();rGrid();rHstats();updCalBtn();}
+function updCalBtn(){const ws=CWS,we=wkDays(ws.y,ws.m,ws.d)[6];document.getElementById('calBtnTxt').textContent=`${pn(ws.d)} ${PM[ws.m-1]} — ${pn(we.d)} ${PM[we.m-1]} ${pn(ws.y)}`;}
+function rHstats(){const wd=wkDays(CWS.y,CWS.m,CWS.d);let it=0,ut=0;wd.forEach(j=>{const ds=jstr(j.y,j.m,j.d);it+=dayI(ds);ut+=dayU(ds);});const c=ic(Math.round(it/7));const cl=c==='hi'?'hs-hi':c==='lo'?'hs-lo':'hs-mi';document.getElementById('hstats').innerHTML=`<div class="hs ${cl}">📚 ${ms(it)}</div><div class="hs hs-un">🎓 ${ms(ut)}</div>`;}
+
+function rGauges(){
+  const wd=wkDays(CWS.y,CWS.m,CWS.d);let it=0,ut=0,bd=0,bdn='—';
+  wd.forEach((j,i)=>{const ds=jstr(j.y,j.m,j.d),t=dayI(ds);it+=t;ut+=dayU(ds);if(t>bd){bd=t;bdn=PD[i];}});
+  const avg=Math.round(it/7),ac=ic(avg);
+  const ac_col=ac==='hi'?'var(--green)':ac==='lo'?'var(--red)':'var(--mid)';
+  const ac_bg=ac==='hi'?'var(--green-soft)':ac==='lo'?'var(--red-soft)':'var(--surface)';
+  document.getElementById('gauges').innerHTML=`
+    <div class="gc"><div class="gi" style="background:var(--blue-soft)">📚</div><div><div class="gl">کل آیلتس هفته</div><div class="gv" style="color:var(--blue)">${ms(it)}</div><div class="gs">${pn(wd.filter(j=>dayI(jstr(j.y,j.m,j.d))>0).length)} روز فعال</div></div></div>
+    <div class="gc"><div class="gi" style="background:${ac_bg}">📊</div><div><div class="gl">میانگین روزانه</div><div class="gv" style="color:${ac_col}">${ms(avg)}</div><div class="gs">هدف: ۴ ساعت</div></div></div>
+    <div class="gc"><div class="gi" style="background:var(--green-soft)">🏆</div><div><div class="gl">بهترین روز</div><div class="gv" style="color:var(--green);font-size:14px">${bd>0?bdn:'—'}</div><div class="gs">${bd>0?ms(bd):''}</div></div></div>
+    <div class="gc"><div class="gi" style="background:var(--orange-soft)">🎓</div><div><div class="gl">کل دانشگاه</div><div class="gv" style="color:var(--orange)">${ms(ut)}</div></div></div>
+    <div class="gc"><div class="gi" style="background:var(--purple-soft)">⏱</div><div><div class="gl">کل مطالعه</div><div class="gv" style="color:var(--purple)">${ms(it+ut)}</div></div></div>`;
+}
+
+function rGrid(){
+  const wd=wkDays(CWS.y,CWS.m,CWS.d);
+  const tds=jstr(_tj.y,_tj.m,_tj.d);
+  let filt=window.TK;
+  if(SEC==='ielts')filt=window.TK.filter(t=>t.type==='ielts');
+  if(SEC==='uni')filt=window.TK.filter(t=>t.type==='uni');
+
+  let h='<thead><tr><th><div style="padding:8px 11px;text-align:right;font-size:10px;color:rgba(255,255,255,.3);font-weight:600">آیتم / جمع هفته</div></th>';
+  wd.forEach((j,i)=>{
+    const ds=jstr(j.y,j.m,j.d),isT=ds===tds,it=dayI(ds),ut=dayU(ds),c=ic(it);
+    h+=`<th${isT?' class="tc"':''}><div class="dh">
+      <div class="dh-name">${PD[i]}</div>
+      <div class="dh-date">${pn(j.d)} ${PM[j.m-1]}</div>
+      ${isT?'<div class="dh-today">● امروز</div>':''}
+      <div class="dh-tots">
+        ${it>0?`<div class="dht dht-${c}">📚 ${ms(it)}</div>`:''}
+        ${ut>0?`<div class="dht dht-un">🎓 ${ms(ut)}</div>`:''}
+      </div></div></th>`;
+  });
+  h+='</tr></thead><tbody>';
+
+  const il=filt.filter(t=>t.type==='ielts'),ul=filt.filter(t=>t.type==='uni');
+  if(il.length){h+=`<tr class="sr ielts"><td colspan="8">IELTS — آمادگی آزمون</td></tr>`;il.forEach(t=>{h+=rRow(t,wd,tds);});}
+  if(ul.length){h+=`<tr class="sr uni"><td colspan="8">دانشگاه و مقاله</td></tr>`;ul.forEach(t=>{h+=rRow(t,wd,tds);});}
+  h+='</tbody>';
+  document.getElementById('grid').innerHTML=h;
+}
+
+function rRow(task,wd,tds){
+  const wt=twt(task.id);
+  const tc=task.type==='ielts'?'tn-i':'tn-u';
+  let h=`<tr class="tr"><td class="tnc" oncontextmenu="ctxO(event,'${task.id}',null)">
+    <div class="tn-row"><div class="tn-name">${task.name}</div>${wt>0?`<div class="tn-wk ${tc}">${ms(wt)}</div>`:''}</div></td>`;
+  wd.forEach(j=>{
+    const ds=jstr(j.y,j.m,j.d),isT=ds===tds;
+    const cell=gC(task.id,ds),cmt=gCM(task.id,ds);
+    h+=`<td${isT?' class="tc"':''}><div class="dc${isT?' tc':''}" onclick="openEM('${task.id}','${ds}')" oncontextmenu="ctxO(event,'${task.id}','${ds}')">`;
+    if(cell&&(cell.planned||cell.actual)){
+      if(cell.planned?.from){
+        const d=dur(cell.planned),hc=cmt.planned;
+        h+=`<div class="eb eb-pl"><button class="edel" onclick="event.stopPropagation();delD('${task.id}','${ds}','planned')">✕</button>
+          <div class="ebl">📋 برنامه${hc?' <span class="cmt-dot"></span>':''}</div>
+          <div class="ebt">${fr(cell.planned)}</div><div class="ebd">${ms(d)}</div></div>`;
+      }
+      if(cell.actual?.from){
+        const d=dur(cell.actual),pd=dur(cell.planned),diff=d-pd;
+        const dly=dlyCalc(cell.planned,cell.actual),hc=cmt.actual||cmt.delayReason;
+        h+=`<div class="eb eb-ac"><button class="edel" onclick="event.stopPropagation();delD('${task.id}','${ds}','actual')">✕</button>
+          <div class="ebl">✅ واقعی${hc?' <span class="cmt-dot"></span>':''}</div>
+          <div class="ebt">${fr(cell.actual)}</div><div class="ebd">${ms(d)}</div>
+          ${dly?.start?`<div class="delay d-st" onclick="event.stopPropagation();openCMT('${task.id}','${ds}')">⚠ شروع +${ms(dly.start)}</div>`:''}
+          ${dly?.end?`<div class="delay d-en" onclick="event.stopPropagation();openCMT('${task.id}','${ds}')">⚠ پایان +${ms(dly.end)}</div>`:''}
+          </div>`;
+        if(pd>0){
+          if(diff>0) h+=`<div class="diff d-more">↑ ${ms(diff)} بیشتر</div>`;
+          else if(diff<0) h+=`<div class="diff d-less">↓ ${ms(-diff)} کمتر</div>`;
+          else h+=`<div class="diff d-eq">= برابر</div>`;
+        }
+      }
+      if(cmt.cell) h+=`<div class="cmt-row">💬 ${cmt.cell}</div>`;
+    } else {
+      h+=`<div class="ah">+</div>`;
+    }
+    h+=`</div></td>`;
+  });
+  return h+'</tr>';
+}
+
+// ═══ CALENDAR ═══
+function toggleCal(){const p=document.getElementById('calpop');if(p.classList.contains('open'))closeCal();else{p.classList.add('open');renderCal();}}
+function closeCal(){document.getElementById('calpop').classList.remove('open');}
+function calMv(d){calM+=d;if(calM>12){calM=1;calY++;}if(calM<1){calM=12;calY--;}renderCal();}
+function gotoToday(){CWS=wkStart(_tj.y,_tj.m,_tj.d);calY=CWS.y;calM=CWS.m;renderCal();render();}
+window.toggleCal=toggleCal;window.closeCal=closeCal;window.calMv=calMv;window.gotoToday=gotoToday;
+
+function renderCal(){
+  document.getElementById('cph-title').textContent=`${PM[calM-1]} ${pn(calY)}`;
+  const tot=dimJ(calY,calM);
+  const fdow=jdow(calY,calM,1);
+  const tds=jstr(_tj.y,_tj.m,_tj.d);
+  const swds=wkDays(CWS.y,CWS.m,CWS.d).map(j=>jstr(j.y,j.m,j.d));
+  let h='';
+  for(let i=0;i<fdow;i++)h+=`<div class="cpd empty"></div>`;
+  for(let d=1;d<=tot;d++){
+    const ds=jstr(calY,calM,d);
+    const isT=ds===tds,inW=swds.includes(ds);
+    h+=`<div class="cpd${isT?' today':''}${inW?' inweek':''}" onclick="selDay('${ds}')">${pn(d)}</div>`;
+  }
+  document.getElementById('cpdays').innerHTML=h;
+  const ws=CWS,we=wkDays(ws.y,ws.m,ws.d)[6];
+  document.getElementById('cpwklbl').textContent=`${pn(ws.d)}–${pn(we.d)} ${PM[ws.m-1]}`;
+}
+function selDay(ds){const j=pj(ds);CWS=wkStart(j.y,j.m,j.d);calY=CWS.y;calM=CWS.m;renderCal();render();}
+window.selDay=selDay;
+
+// ═══ CONTEXT MENU ═══
+function ctxO(e,tid,ds){e.preventDefault();e.stopPropagation();CS={tid,ds};const m=document.getElementById('ctx');m.style.top=e.clientY+'px';m.style.right=(window.innerWidth-e.clientX)+'px';m.classList.add('open');}
+window.ctxO=ctxO;
+document.addEventListener('click',()=>document.getElementById('ctx').classList.remove('open'));
+function ctxPlan(){document.getElementById('ctx').classList.remove('open');if(CS.ds)openEM(CS.tid,CS.ds,'plan');}
+function ctxActual(){document.getElementById('ctx').classList.remove('open');if(CS.ds)openEM(CS.tid,CS.ds,'actual');}
+function ctxComment(){document.getElementById('ctx').classList.remove('open');openCMT(CS.tid,CS.ds);}
+function ctxClear(){
+  document.getElementById('ctx').classList.remove('open');
+  if(!CS.ds)return;if(!confirm('سلول پاک بشه؟'))return;
+  if(window.DB[wk()]?.[CS.tid])delete window.DB[wk()][CS.tid][CS.ds];
+  if(window.CM[wk()]?.[CS.tid])delete window.CM[wk()][CS.tid][CS.ds];
+  saveFB();render();
+}
+window.ctxPlan=ctxPlan;window.ctxActual=ctxActual;window.ctxComment=ctxComment;window.ctxClear=ctxClear;
+
+// ═══ ENTRY MODAL ═══
+function openEM(tid,ds,fmode){
+  const task=window.TK.find(t=>t.id===tid);
+  const j=pj(ds);
+  const di=wkDays(CWS.y,CWS.m,CWS.d).findIndex(jd=>jstr(jd.y,jd.m,jd.d)===ds);
+  MS={tid,ds,mode:fmode||'plan'};
+  document.getElementById('mtitle').textContent=task.name;
+  document.getElementById('msub').textContent=`${di>=0?PD[di]:''} ${pn(j.d)} ${PM[j.m-1]} ${pn(j.y)}`;
+  setMode(fmode||'plan');
+  const cell=gC(tid,ds);
+  const hasAny=cell&&(cell.planned?.from||cell.actual?.from);
+  document.getElementById('delB').style.display=hasAny?'block':'none';
+  document.getElementById('eo').classList.add('open');
+  setTimeout(()=>document.getElementById('iF').focus(),150);
+}
+window.openEM=openEM;
+
+function setMode(m){
+  MS.mode=m;
+  document.getElementById('mpb').className='mtb'+(m==='plan'?' ap':'');
+  document.getElementById('mab').className='mtb'+(m==='actual'?' aa':'');
+  const cell=gC(MS.tid,MS.ds),cmt=gCM(MS.tid,MS.ds);
+  const entry=m==='plan'?cell?.planned:cell?.actual;
+  document.getElementById('iF').value=entry?.from||'';
+  document.getElementById('iT').value=entry?.to||'';
+  document.getElementById('ecmt').value=m==='plan'?(cmt.planned||''):(cmt.actual||'');
+  document.querySelectorAll('#eo .fi[type=time]').forEach(el=>{el.className='fi'+(m==='actual'?' pu':'');});
+  if(m==='actual'){document.getElementById('dsec').style.display='block';document.getElementById('dcmt').value=cmt.delayReason||'';updDly();}
+  else document.getElementById('dsec').style.display='none';
+  calcD();
+}
+window.setMode=setMode;
+
+function updDly(){
+  const cell=gC(MS.tid,MS.ds);
+  const fv=document.getElementById('iF').value,tv=document.getElementById('iT').value;
+  const dly=dlyCalc(cell?.planned,{from:fv,to:tv});
+  const el=document.getElementById('dinfo');
+  if(dly){let t='';if(dly.start)t+=`⚠️ تأخیر شروع: <strong style="color:var(--red)">${ms(dly.start)}</strong>  `;if(dly.end)t+=`⚠️ تأخیر پایان: <strong style="color:var(--yellow)">${ms(dly.end)}</strong>`;el.innerHTML=t;}
+  else el.innerHTML=cell?.planned?'✅ بدون تأخیر':'—';
+}
+function calcD(){const f=document.getElementById('iF').value,t=document.getElementById('iT').value,d=pt(t)-pt(f);document.getElementById('ddis').textContent=(f&&t&&d>0)?ms(d):'—';if(MS.mode==='actual')updDly();}
+window.calcD=calcD;
+
+function saveE(){
+  const f=document.getElementById('iF').value,t=document.getElementById('iT').value;
+  if(!f||!t){alert('ساعت شروع و پایان را وارد کنید.');return;}
+  if(pt(t)-pt(f)<=0){alert('ساعت پایان باید بعد از شروع باشد.');return;}
+  const {tid,ds,mode}=MS;
+  if(!window.DB[wk()])window.DB[wk()]={};
+  if(!window.DB[wk()][tid])window.DB[wk()][tid]={};
+  if(!window.DB[wk()][tid][ds])window.DB[wk()][tid][ds]={};
+  window.DB[wk()][tid][ds][mode==='plan'?'planned':'actual']={from:f,to:t};
+  const cmt=gCM(tid,ds);
+  const ec=document.getElementById('ecmt').value.trim();
+  if(mode==='plan')cmt.planned=ec;
+  else{cmt.actual=ec;cmt.delayReason=document.getElementById('dcmt').value.trim();}
+  sCM(tid,ds,cmt);
+  closeEM();saveFB();render();
+}
+function delEntry(){const{tid,ds}=MS;if(window.DB[wk()]?.[tid])delete window.DB[wk()][tid][ds];closeEM();saveFB();render();}
+function delD(tid,ds,type){
+  const k=wk();
+  if(window.DB[k]?.[tid]?.[ds]){
+    if(type==='planned')delete window.DB[k][tid][ds].planned;
+    if(type==='actual')delete window.DB[k][tid][ds].actual;
+    if(!window.DB[k][tid][ds].planned&&!window.DB[k][tid][ds].actual)delete window.DB[k][tid][ds];
+  }
+  saveFB();render();
+}
+function closeEM(){document.getElementById('eo').classList.remove('open');}
+window.saveE=saveE;window.delEntry=delEntry;window.delD=delD;window.closeEM=closeEM;
+document.getElementById('eo').addEventListener('click',function(e){if(e.target===this)closeEM();});
+
+// ═══ COMMENT MODAL ═══
+function openCMT(tid,ds){
+  if(!tid)return;
+  CMT_S={tid,ds};
+  const task=window.TK.find(t=>t.id===tid);
+  if(ds){const j=pj(ds);document.getElementById('csub').textContent=`${task?.name||''} — ${pn(j.d)} ${PM[j.m-1]}`;}
+  else document.getElementById('csub').textContent=task?.name||'';
+  document.getElementById('ccmt').value=ds?gCM(tid,ds).cell||'':'';
+  document.getElementById('co').classList.add('open');
+  setTimeout(()=>document.getElementById('ccmt').focus(),150);
+}
+function saveCMT(){
+  const{tid,ds}=CMT_S;if(!ds)return;
+  const cmt=gCM(tid,ds);cmt.cell=document.getElementById('ccmt').value.trim();sCM(tid,ds,cmt);
+  closeCM();saveFB();render();
+}
+function closeCM(){document.getElementById('co').classList.remove('open');}
+window.openCMT=openCMT;window.saveCMT=saveCMT;window.closeCM=closeCM;
+document.getElementById('co').addEventListener('click',function(e){if(e.target===this)closeCM();});
+
+// ═══ TASK MGMT ═══
+function openTM(){rTM();document.getElementById('to').classList.add('open');}
+function closeTM(){document.getElementById('to').classList.remove('open');render();}
+function rTM(){document.getElementById('tml').innerHTML=window.TK.map(t=>`<div class="tmi"><div class="tmi-n">${t.name}</div><div class="tmi-t t${t.type}">${t.type==='ielts'?'IELTS':'دانشگاه'}</div><button class="tmi-d" onclick="remT('${t.id}')">✕</button></div>`).join('');}
+function addT(){const n=document.getElementById('ntn').value.trim(),tp=document.getElementById('ntt').value;if(!n)return;window.TK.push({id:'t_'+Date.now(),name:n,type:tp});document.getElementById('ntn').value='';rTM();saveFB();}
+function remT(id){window.TK=window.TK.filter(t=>t.id!==id);rTM();saveFB();}
+window.openTM=openTM;window.closeTM=closeTM;window.addT=addT;window.remT=remT;
+document.getElementById('to').addEventListener('click',function(e){if(e.target===this)closeTM();});
+
+function setSec(s,el){SEC=s;document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
+window.setSec=setSec;
+
+// Close calendar on outside click
+document.addEventListener('click',function(e){
+  const p=document.getElementById('calpop'),b=document.getElementById('calBtn');
+  if(p.classList.contains('open')&&!p.contains(e.target)&&!b.contains(e.target))closeCal();
+});
+</script>
+</body>
+</html>
